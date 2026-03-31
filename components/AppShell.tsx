@@ -27,7 +27,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div>
           <p className="eyebrow">CRM MVP</p>
           <h1>Gestion comercial</h1>
-          <p className="muted">Clientes, productos y pedidos con SQLite + Prisma.</p>
+          <p className="muted">Clientes, productos y pedidos con Supabase y despliegue en Vercel.</p>
         </div>
         <nav className="nav">
           {navigation.map((item) => (

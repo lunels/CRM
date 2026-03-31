@@ -1,21 +1,13 @@
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
+import { fetchDashboardStats, fetchRecentOrders } from "@/lib/data";
 import { formatCurrency, formatDate, getDisplayName } from "@/lib/utils";
 import { PageHeader } from "@/components/PageHeader";
 import { StatCard } from "@/components/StatCard";
 
 export default async function DashboardPage() {
-  const [customerCount, productCount, orderCount, recentOrders] = await Promise.all([
-    prisma.customer.count(),
-    prisma.product.count(),
-    prisma.order.count(),
-    prisma.order.findMany({
-      take: 5,
-      orderBy: { date: "desc" },
-      include: {
-        customer: true
-      }
-    })
+  const [{ customerCount, productCount, orderCount }, recentOrders] = await Promise.all([
+    fetchDashboardStats(),
+    fetchRecentOrders()
   ]);
 
   return (
@@ -64,12 +56,12 @@ export default async function DashboardPage() {
                 recentOrders.map((order) => (
                   <tr key={order.id}>
                     <td>
-                      <Link href={`/orders/${order.id}`}>{order.orderNumber}</Link>
+                      <Link href={`/orders/${order.id}`}>{order.numero}</Link>
                     </td>
-                    <td>{getDisplayName(order.customer)}</td>
-                    <td>{formatDate(order.date)}</td>
-                    <td>{order.status}</td>
-                    <td>{formatCurrency(order.total.toString())}</td>
+                    <td>{order.cliente ? getDisplayName(order.cliente) : "-"}</td>
+                    <td>{formatDate(order.fecha)}</td>
+                    <td>{order.estado}</td>
+                    <td>{formatCurrency(order.total)}</td>
                   </tr>
                 ))
               )}

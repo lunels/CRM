@@ -2,20 +2,27 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
 import { parseCsv } from "@/lib/csv";
 import { productSchema } from "@/lib/validation";
 import type { ImportState } from "@/lib/actions/customers";
+import { createSupabaseServerClient } from "@/lib/supabase";
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (typeof error === "object" && error && "message" in error && typeof error.message === "string") {
+    return error.message;
+  }
+  return fallback;
+}
 
 function buildProductPayload(formData: FormData) {
   return {
-    name: String(formData.get("name") || ""),
+    nombre: String(formData.get("nombre") || ""),
     sku: String(formData.get("sku") || ""),
-    description: String(formData.get("description") || ""),
-    price: Number(formData.get("price") || 0),
+    descripcion: String(formData.get("descripcion") || ""),
+    precio: Number(formData.get("precio") || 0),
     stock: Number(formData.get("stock") || 0),
-    category: String(formData.get("category") || ""),
-    isActive: formData.get("isActive") === "on"
+    categoria: String(formData.get("categoria") || ""),
+    activo: formData.get("activo") === "on"
   };
 }
 
@@ -24,6 +31,7 @@ function getProductRedirectPath(id?: string | null) {
 }
 
 export async function saveProductAction(formData: FormData) {
+  const supabase = createSupabaseServerClient();
   const id = String(formData.get("id") || "");
   const parsed = productSchema.safeParse(buildProductPayload(formData));
 
@@ -33,20 +41,21 @@ export async function saveProductAction(formData: FormData) {
 
   try {
     if (id) {
-      await prisma.product.update({
-        where: { id },
-        data: parsed.data
-      });
+      const { error } = await supabase.from("productos").update(parsed.data).eq("id", id);
+      if (error) {
+        throw error;
+      }
     } else {
-      await prisma.product.create({
-        data: parsed.data
-      });
+      const { error } = await supabase.from("productos").insert(parsed.data);
+      if (error) {
+        throw error;
+      }
     }
   } catch (error) {
-    const message =
-      error instanceof Error && error.message.includes("Unique constraint")
-        ? "Ya existe un producto con ese SKU."
-        : "No se pudo guardar el producto.";
+    const rawMessage = getErrorMessage(error, "");
+    const message = rawMessage.toLowerCase().includes("duplicate")
+      ? "Ya existe un producto con ese SKU."
+      : "No se pudo guardar el producto.";
     redirect(`${getProductRedirectPath(id)}?error=${encodeURIComponent(message)}`);
   }
 
@@ -56,18 +65,22 @@ export async function saveProductAction(formData: FormData) {
 }
 
 export async function deleteProductAction(formData: FormData) {
+  const supabase = createSupabaseServerClient();
   const id = String(formData.get("id") || "");
   if (!id) {
     redirect(`/products?error=${encodeURIComponent("Producto no valido.")}`);
   }
 
   try {
-    await prisma.product.delete({
-      where: { id }
-    });
-  } catch {
+    const { error } = await supabase.from("productos").delete().eq("id", id);
+    if (error) {
+      throw error;
+    }
+  } catch (error) {
     redirect(
-      `/products?error=${encodeURIComponent("No se puede eliminar un producto incluido en pedidos.")}`
+      `/products?error=${encodeURIComponent(
+        getErrorMessage(error, "No se puede eliminar un producto incluido en pedidos.")
+      )}`
     );
   }
 
@@ -77,6 +90,7 @@ export async function deleteProductAction(formData: FormData) {
 }
 
 export async function importProductsAction(_: ImportState, formData: FormData): Promise<ImportState> {
+  const supabase = createSupabaseServerClient();
   const file = formData.get("file");
 
   if (!(file instanceof File) || file.size === 0) {
@@ -99,17 +113,17 @@ export async function importProductsAction(_: ImportState, formData: FormData): 
   }
 
   const errors: string[] = [];
-  let imported = 0;
+  const validRows: Array<Record<string, string | number | boolean>> = [];
 
   for (const [index, record] of records.entries()) {
     const parsed = productSchema.safeParse({
-      name: record.nombre || record.name || "",
+      nombre: record.nombre || record.name || "",
       sku: record.sku || record.referencia || "",
-      description: record.descripcion || record.description || "",
-      price: record.precio || record.price || 0,
+      descripcion: record.descripcion || record.description || "",
+      precio: record.precio || record.price || 0,
       stock: record.stock || 0,
-      category: record.categoria || record.category || "",
-      isActive: ["true", "1", "si", "yes", "activo"].includes(
+      categoria: record.categoria || record.category || "",
+      activo: ["true", "1", "si", "yes", "activo"].includes(
         String(record.activo || record.is_active || "true").toLowerCase()
       )
     });
@@ -119,15 +133,21 @@ export async function importProductsAction(_: ImportState, formData: FormData): 
       continue;
     }
 
-    try {
-      await prisma.product.upsert({
-        where: { sku: parsed.data.sku },
-        update: parsed.data,
-        create: parsed.data
-      });
-      imported += 1;
-    } catch {
-      errors.push(`Fila ${index + 2}: no se pudo insertar el producto.`);
+    validRows.push(parsed.data);
+  }
+
+  let imported = 0;
+
+  if (validRows.length > 0) {
+    const { error, data } = await supabase
+      .from("productos")
+      .upsert(validRows, { onConflict: "sku" })
+      .select("id");
+
+    if (error) {
+      errors.push(`Error general de importacion: ${error.message}`);
+    } else {
+      imported = data?.length || validRows.length;
     }
   }
 

@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { Prisma } from "@prisma/client";
 import { deleteProductAction } from "@/lib/actions/products";
-import { prisma } from "@/lib/prisma";
+import { fetchProducts } from "@/lib/data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Notice } from "@/components/Notice";
 import { PageHeader } from "@/components/PageHeader";
@@ -15,28 +14,23 @@ export default async function ProductsPage({
   const params = await searchParams;
   const query = params.q?.trim() || "";
   const sort = params.sort || "newest";
-
-  const where: Prisma.ProductWhereInput = query
-    ? {
-        OR: [
-          { name: { contains: query } },
-          { sku: { contains: query } },
-          { category: { contains: query } }
-        ]
+  const products = (await fetchProducts())
+    .filter((product) => {
+      if (!query) {
+        return true;
       }
-    : {};
-
-  const orderBy =
-    sort === "name"
-      ? [{ name: "asc" as const }]
-      : sort === "stock"
-        ? [{ stock: "asc" as const }]
-        : [{ createdAt: "desc" as const }];
-
-  const products = await prisma.product.findMany({
-    where,
-    orderBy
-  });
+      const haystack = `${product.nombre} ${product.sku} ${product.categoria || ""}`.toLowerCase();
+      return haystack.includes(query.toLowerCase());
+    })
+    .sort((left, right) => {
+      if (sort === "name") {
+        return left.nombre.localeCompare(right.nombre, "es");
+      }
+      if (sort === "stock") {
+        return left.stock - right.stock;
+      }
+      return new Date(right.created_at).getTime() - new Date(left.created_at).getTime();
+    });
 
   return (
     <div className="page-stack">
@@ -87,14 +81,14 @@ export default async function ProductsPage({
               products.map((product) => (
                 <tr key={product.id}>
                   <td>
-                    <strong>{product.name}</strong>
-                    <div className="table-subtext">{formatDate(product.createdAt)}</div>
+                    <strong>{product.nombre}</strong>
+                    <div className="table-subtext">{formatDate(product.created_at)}</div>
                   </td>
                   <td>{product.sku}</td>
-                  <td>{product.category || "-"}</td>
-                  <td>{formatCurrency(product.price.toString())}</td>
+                  <td>{product.categoria || "-"}</td>
+                  <td>{formatCurrency(product.precio)}</td>
                   <td>{product.stock}</td>
-                  <td>{product.isActive ? "Activo" : "Inactivo"}</td>
+                  <td>{product.activo ? "Activo" : "Inactivo"}</td>
                   <td className="row-actions">
                     <Link href={`/products/${product.id}/edit`} className="button button-secondary">
                       Editar

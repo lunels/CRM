@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { updateOrderStatusAction } from "@/lib/actions/orders";
 import { ORDER_STATUSES } from "@/lib/constants";
-import { prisma } from "@/lib/prisma";
+import { fetchOrderById } from "@/lib/data";
 import { formatCurrency, formatDate, getDisplayName } from "@/lib/utils";
 import { Notice } from "@/components/Notice";
 import { PageHeader } from "@/components/PageHeader";
@@ -12,22 +12,12 @@ export default async function OrderDetailPage({
   searchParams
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ success?: string }>;
+  searchParams: Promise<{ success?: string; error?: string }>;
 }) {
   const { id } = await params;
   const query = await searchParams;
 
-  const order = await prisma.order.findUnique({
-    where: { id },
-    include: {
-      customer: true,
-      items: {
-        include: {
-          product: true
-        }
-      }
-    }
-  });
+  const order = await fetchOrderById(id);
 
   if (!order) {
     notFound();
@@ -36,12 +26,13 @@ export default async function OrderDetailPage({
   return (
     <div className="page-stack">
       <PageHeader
-        title={`Pedido ${order.orderNumber}`}
-        description={`Detalle completo del pedido para ${getDisplayName(order.customer)}.`}
+        title={`Pedido ${order.numero}`}
+        description={`Detalle completo del pedido para ${order.cliente ? getDisplayName(order.cliente) : "cliente"}.`}
         actions={[{ href: `/orders/${order.id}/edit`, label: "Editar pedido" }]}
       />
 
       <Notice message={query.success} />
+      <Notice message={query.error} tone="error" />
 
       <div className="detail-grid">
         <section className="card form-stack">
@@ -58,21 +49,21 @@ export default async function OrderDetailPage({
           <div className="detail-list">
             <div>
               <span className="muted">Cliente</span>
-              <strong>{getDisplayName(order.customer)}</strong>
+              <strong>{order.cliente ? getDisplayName(order.cliente) : "-"}</strong>
             </div>
             <div>
               <span className="muted">Fecha</span>
-              <strong>{formatDate(order.date)}</strong>
+              <strong>{formatDate(order.fecha)}</strong>
             </div>
             <div>
               <span className="muted">Estado actual</span>
-              <strong>{order.status}</strong>
+              <strong>{order.estado}</strong>
             </div>
           </div>
 
           <form action={updateOrderStatusAction} className="status-form">
             <input type="hidden" name="id" value={order.id} />
-            <select className="input" name="status" defaultValue={order.status}>
+            <select className="input" name="status" defaultValue={order.estado}>
               {ORDER_STATUSES.map((status) => (
                 <option key={status.value} value={status.value}>
                   {status.label}
@@ -87,22 +78,22 @@ export default async function OrderDetailPage({
           <div className="detail-list">
             <div>
               <span className="muted">Subtotal</span>
-              <strong>{formatCurrency(order.subtotal.toString())}</strong>
+              <strong>{formatCurrency(order.subtotal)}</strong>
             </div>
             <div>
               <span className="muted">Impuestos</span>
-              <strong>{formatCurrency(order.tax.toString())}</strong>
+              <strong>{formatCurrency(order.impuestos)}</strong>
             </div>
             <div>
               <span className="muted">Total</span>
-              <strong>{formatCurrency(order.total.toString())}</strong>
+              <strong>{formatCurrency(order.total)}</strong>
             </div>
           </div>
 
-          {order.notes ? (
+          {order.notas ? (
             <div>
               <span className="muted">Notas</span>
-              <p>{order.notes}</p>
+              <p>{order.notas}</p>
             </div>
           ) : null}
         </section>
@@ -126,12 +117,12 @@ export default async function OrderDetailPage({
                 </tr>
               </thead>
               <tbody>
-                {order.items.map((item) => (
+                {order.lineas?.map((item) => (
                   <tr key={item.id}>
-                    <td>{item.product.name}</td>
-                    <td>{item.quantity}</td>
-                    <td>{formatCurrency(item.unitPrice.toString())}</td>
-                    <td>{formatCurrency(item.lineTotal.toString())}</td>
+                    <td>{item.producto?.nombre || "-"}</td>
+                    <td>{item.cantidad}</td>
+                    <td>{formatCurrency(item.precio_unitario)}</td>
+                    <td>{formatCurrency(item.total)}</td>
                   </tr>
                 ))}
               </tbody>

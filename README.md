@@ -1,30 +1,28 @@
-# CRM Web MVP
+# CRM Web MVP con Supabase
 
-Aplicacion web tipo CRM, sencilla pero funcional, construida con Next.js, TypeScript, Prisma y SQLite. Incluye gestion de clientes, productos y pedidos, dashboard inicial e importacion CSV para clientes y productos.
+CRM web sencillo y funcional, preparado para desplegarse en Vercel y usar Supabase como backend serverless. Mantiene dashboard, CRUD de clientes, productos y pedidos, junto con importacion CSV para clientes y productos.
 
 ## Stack
 
 - Next.js 15 con App Router
 - TypeScript
-- Prisma ORM
-- SQLite
+- Supabase (`@supabase/supabase-js`)
+- PostgreSQL gestionado por Supabase
 - React 19
-- Server Actions para operaciones CRUD
+- Server Actions ligeras compatibles con Vercel
 
-## Funcionalidades incluidas
+## Que hace este proyecto
 
 - Dashboard con resumen de clientes, productos y pedidos
 - CRUD de clientes
 - CRUD de productos
-- CRUD de pedidos con lineas de pedido
+- CRUD de pedidos con lineas
 - Cambio de estado de pedidos
 - Busqueda y ordenacion basica
-- Importacion CSV de clientes y productos
-- Mensajes de exito y error
-- Seed opcional con datos de ejemplo
-- Estilos responsive y estructura modular
+- Importacion CSV con validacion previa
+- UI responsive y simple
 
-## Estructura del proyecto
+## Estructura
 
 ```text
 crm-web/
@@ -33,178 +31,174 @@ crm-web/
 ├── lib/
 │   ├── actions/
 │   ├── csv.ts
-│   ├── prisma.ts
+│   ├── data.ts
+│   ├── supabase.ts
+│   ├── types.ts
 │   ├── utils.ts
 │   └── validation.ts
-├── prisma/
-│   ├── schema.prisma
-│   └── seed.ts
+├── supabase/
+│   └── schema.sql
 ├── .env.example
 ├── .gitignore
 ├── package.json
 └── README.md
 ```
 
-## Requisitos previos
+## Variables de entorno
 
-- Node.js 20 o superior
-- npm 10 o superior
-
-Comprueba versiones:
+Crea un archivo `.env.local` a partir de `.env.example`:
 
 ```bash
-node -v
-npm -v
+cp .env.example .env.local
 ```
+
+Contenido esperado:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+```
+
+## Crear el proyecto en Supabase
+
+1. Crea un proyecto nuevo en [Supabase](https://supabase.com/).
+2. Espera a que termine el aprovisionamiento.
+3. Ve a `Project Settings > API`.
+4. Copia:
+   - `Project URL` en `NEXT_PUBLIC_SUPABASE_URL`
+   - `anon public key` en `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+## Crear el esquema de base de datos
+
+Dentro de Supabase:
+
+1. Abre `SQL Editor`.
+2. Crea una nueva query.
+3. Copia el contenido de `supabase/schema.sql`.
+4. Ejecuta la query.
+
+Ese script crea:
+
+- tablas `clientes`, `productos`, `pedidos`, `pedido_lineas`
+- claves foraneas
+- indices
+- restricciones unicas
+- politicas RLS abiertas para MVP
+
+Importante: las politicas incluidas facilitan el arranque con la `anon key`. Para un entorno real conviene endurecerlas y anadir autenticacion.
 
 ## Instalacion local
 
-1. Entrar en la carpeta del proyecto:
+1. Entra en la carpeta:
 
 ```bash
 cd crm-web
 ```
 
-2. Crear el archivo de entorno:
-
-```bash
-cp .env.example .env
-```
-
-3. Instalar dependencias:
+2. Instala dependencias:
 
 ```bash
 npm install
 ```
 
-4. Generar el cliente Prisma:
+3. Crea `.env.local` y pega tus credenciales de Supabase.
 
-```bash
-npm run prisma:generate
-```
-
-5. Crear la base de datos SQLite y sincronizar esquema:
-
-```bash
-npm run prisma:push
-```
-
-6. Cargar datos de ejemplo opcionales:
-
-```bash
-npm run seed
-```
-
-7. Arrancar el entorno de desarrollo:
+4. Arranca el entorno local:
 
 ```bash
 npm run dev
 ```
 
-La aplicacion quedara disponible en:
+La aplicacion quedara en:
 
 ```text
 http://localhost:3000
 ```
 
-## Scripts utiles
+## Build de produccion
 
-- `npm run dev`: desarrollo local
-- `npm run build`: build de produccion
-- `npm run start`: arranque en produccion
-- `npm run prisma:generate`: generar cliente Prisma
-- `npm run prisma:push`: aplicar esquema a SQLite
-- `npm run prisma:migrate`: crear migraciones en desarrollo
-- `npm run prisma:studio`: abrir Prisma Studio
-- `npm run seed`: cargar datos de ejemplo
+Para verificar compatibilidad con Vercel:
 
-## Base de datos
+```bash
+npm run build
+```
 
-El proyecto usa SQLite para simplificar el arranque local.
+## Despliegue en Vercel
 
-- Archivo configurado mediante `DATABASE_URL`
-- Valor por defecto en `.env.example`: `file:./dev.db`
+1. Sube este proyecto a GitHub.
+2. Crea un proyecto en [Vercel](https://vercel.com/).
+3. Importa el repositorio.
+4. En `Environment Variables`, configura:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+5. Lanza el despliegue.
 
-## Entidades principales
+No se usa almacenamiento local persistente ni SQLite, por lo que el proyecto es compatible con entorno serverless.
 
-### Clientes
+## Modelo de datos en Supabase
 
-Campos principales:
+### `clientes`
 
 - `id`
-- `firstName`
-- `lastName`
-- `company`
+- `nombre`
 - `email`
-- `phone`
-- `address`
-- `city`
-- `postalCode`
-- `country`
-- `notes`
-- `createdAt`
+- `telefono`
+- `direccion`
+- `ciudad`
+- `codigo_postal`
+- `pais`
+- `notas`
+- `created_at`
 
-### Productos
-
-Campos principales:
+### `productos`
 
 - `id`
-- `name`
+- `nombre`
 - `sku`
-- `description`
-- `price`
+- `descripcion`
+- `precio`
 - `stock`
-- `category`
-- `isActive`
-- `createdAt`
+- `categoria`
+- `activo`
+- `created_at`
 
-### Pedidos
-
-Campos principales:
+### `pedidos`
 
 - `id`
-- `orderNumber`
-- `customerId`
-- `date`
-- `status`
+- `numero`
+- `cliente_id`
+- `fecha`
+- `estado`
 - `subtotal`
-- `tax`
+- `impuestos`
 - `total`
-- `notes`
+- `notas`
+- `created_at`
 
-Cada pedido incluye lineas con:
+### `pedido_lineas`
 
-- `productId`
-- `quantity`
-- `unitPrice`
-- `lineTotal`
+- `id`
+- `pedido_id`
+- `producto_id`
+- `cantidad`
+- `precio_unitario`
+- `total`
 
 ## Importacion CSV
 
-Hay pantallas especificas para importar clientes y productos:
+Pantallas disponibles:
 
 - `/customers/import`
 - `/products/import`
 
-### CSV de clientes
-
-Formato recomendado:
+### Formato CSV de clientes
 
 ```csv
 nombre,email,telefono,direccion,ciudad,codigo_postal,pais,notas
 Lucia,lucia@empresa.com,+34600111222,Calle Mayor 1,Madrid,28001,Espana,Cliente VIP
 ```
 
-Comportamiento:
-
-- valida campos minimos
-- muestra resumen de importacion
-- indica filas con error
-- si el email ya existe, actualiza el cliente
-
-### CSV de productos
-
-Formato recomendado:
+### Formato CSV de productos
 
 ```csv
 nombre,sku,descripcion,precio,stock,categoria,activo
@@ -213,78 +207,50 @@ Producto demo,SKU-001,Descripcion,99.90,12,Software,true
 
 Comportamiento:
 
-- valida campos minimos
-- muestra resumen de importacion
-- indica filas con error
-- si el SKU ya existe, actualiza el producto
+- valida filas antes de insertar
+- usa `upsert` en batch con Supabase
+- actualiza por `email` en clientes
+- actualiza por `sku` en productos
+- muestra resumen y errores
 
-## Despliegue
+## Scripts
 
-Para un despliegue sencillo en Vercel:
-
-1. Configura la variable `DATABASE_URL`
-2. Ejecuta build:
-
-```bash
-npm run build
-```
-
-3. Arranca en produccion:
-
-```bash
-npm run start
-```
-
-Nota: para produccion real conviene migrar de SQLite a PostgreSQL o MySQL.
+- `npm run dev`
+- `npm run build`
+- `npm run start`
+- `npm run lint`
 
 ## Git y GitHub
 
-El proyecto queda preparado para trabajar con Git y subirlo a GitHub facilmente.
-
-### Inicializar y revisar estado
+### Revisar estado
 
 ```bash
 cd crm-web
 git status
 ```
 
-### Crear un repositorio remoto nuevo en GitHub
-
-Con GitHub CLI:
+### Crear repo remoto con GitHub CLI
 
 ```bash
 gh repo create crm-web --private --source=. --remote=origin
 ```
 
-### O conectar un repositorio remoto existente
+### O conectar un remoto existente
 
 ```bash
 git remote add origin https://github.com/TU_USUARIO/TU_REPO.git
 ```
 
-### Renombrar rama principal a `main`
-
-```bash
-git branch -M main
-```
-
-### Subir el proyecto por primera vez
+### Subir a `main`
 
 ```bash
 git push -u origin main
 ```
 
-## Primer commit
-
-El commit inicial solicitado es:
-
-```text
-Initial CRM setup
-```
-
 ## Notas tecnicas
 
-- No incluye autenticacion para mantener el MVP simple
-- El backend esta integrado en Next.js mediante Server Actions
-- La UI prioriza claridad, mantenimiento y rapidez de arranque
-- El proyecto esta preparado para crecer con modulos adicionales
+- La capa de datos ya no depende de Prisma ni SQLite
+- Las operaciones CRUD usan `@supabase/supabase-js`
+- El proyecto no necesita backend tradicional
+- Las Server Actions actuan como capa ligera compatible con Vercel
+- La autenticacion con Supabase Auth no se ha activado para mantener el MVP simple

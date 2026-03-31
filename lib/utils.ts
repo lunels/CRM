@@ -22,10 +22,7 @@ export function toSlug(value: string) {
 }
 
 export function getDisplayName(customer: {
-  firstName: string;
-  lastName?: string | null;
-  company?: string | null;
+  nombre: string;
 }) {
-  const fullName = [customer.firstName, customer.lastName].filter(Boolean).join(" ").trim();
-  return customer.company?.trim() || fullName || customer.firstName;
+  return customer.nombre;
 }

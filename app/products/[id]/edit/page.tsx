@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
-import { ProductForm } from "@/components/ProductForm";
+import { ProductForm, type ProductFormData } from "@/components/ProductForm";
 import { Notice } from "@/components/Notice";
 import { PageHeader } from "@/components/PageHeader";
-import { prisma } from "@/lib/prisma";
+import { fetchProductById } from "@/lib/data";
 
 export default async function EditProductPage({
   params,
@@ -13,19 +13,28 @@ export default async function EditProductPage({
 }) {
   const { id } = await params;
   const query = await searchParams;
-  const product = await prisma.product.findUnique({
-    where: { id }
-  });
+  const product = await fetchProductById(id);
 
   if (!product) {
     notFound();
   }
 
+  const productFormData: ProductFormData = {
+    id: product.id,
+    nombre: product.nombre,
+    sku: product.sku,
+    descripcion: product.descripcion,
+    precio: product.precio,
+    stock: product.stock,
+    categoria: product.categoria,
+    activo: product.activo
+  };
+
   return (
     <div className="page-stack">
       <PageHeader title="Editar producto" description="Actualiza el detalle del producto seleccionado." />
       <Notice message={query.error} tone="error" />
-      <ProductForm product={product} />
+      <ProductForm product={productFormData} />
     </div>
   );
 }

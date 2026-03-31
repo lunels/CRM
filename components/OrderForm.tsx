@@ -12,22 +12,22 @@ type CustomerOption = {
 
 type ProductOption = {
   id: string;
-  name: string;
+  nombre: string;
   sku: string;
-  price: number;
+  precio: number;
 };
 
 type OrderFormValue = {
   id?: string;
-  orderNumber?: string;
-  customerId?: string;
-  date?: string;
-  status?: string;
-  notes?: string | null;
+  numero?: string;
+  cliente_id?: string;
+  fecha?: string;
+  estado?: string;
+  notas?: string | null;
   items?: Array<{
-    productId: string;
-    quantity: number;
-    unitPrice: number;
+    producto_id: string;
+    cantidad: number;
+    precio_unitario: number;
   }>;
 };
 
@@ -43,42 +43,42 @@ export function OrderForm({
   const [items, setItems] = useState(
     order?.items?.length
       ? order.items
-      : [{ productId: products[0]?.id || "", quantity: 1, unitPrice: products[0]?.price || 0 }]
+      : [{ producto_id: products[0]?.id || "", cantidad: 1, precio_unitario: products[0]?.precio || 0 }]
   );
 
   const totals = useMemo(() => {
-    const subtotal = items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+    const subtotal = items.reduce((sum, item) => sum + item.cantidad * item.precio_unitario, 0);
     const taxes = subtotal * TAX_RATE;
     const total = subtotal + taxes;
     return { subtotal, taxes, total };
   }, [items]);
 
-  function updateItem(index: number, key: "productId" | "quantity" | "unitPrice", value: string) {
+  function updateItem(index: number, key: "producto_id" | "cantidad" | "precio_unitario", value: string) {
     setItems((current) =>
       current.map((item, itemIndex) => {
         if (itemIndex !== index) {
           return item;
         }
 
-        if (key === "productId") {
+        if (key === "producto_id") {
           const product = products.find((candidate) => candidate.id === value);
           return {
-            productId: value,
-            quantity: item.quantity,
-            unitPrice: product?.price ?? item.unitPrice
+            producto_id: value,
+            cantidad: item.cantidad,
+            precio_unitario: product?.precio ?? item.precio_unitario
           };
         }
 
-        if (key === "quantity") {
+        if (key === "cantidad") {
           return {
             ...item,
-            quantity: Math.max(1, Number(value || 1))
+            cantidad: Math.max(1, Number(value || 1))
           };
         }
 
         return {
           ...item,
-          unitPrice: Math.max(0, Number(value || 0))
+          precio_unitario: Math.max(0, Number(value || 0))
         };
       })
     );
@@ -87,7 +87,7 @@ export function OrderForm({
   function addLine() {
     setItems((current) => [
       ...current,
-      { productId: products[0]?.id || "", quantity: 1, unitPrice: products[0]?.price || 0 }
+      { producto_id: products[0]?.id || "", cantidad: 1, precio_unitario: products[0]?.precio || 0 }
     ]);
   }
 
@@ -103,12 +103,12 @@ export function OrderForm({
       <div className="form-grid">
         <label className="field">
           <span>Numero de pedido</span>
-          <input className="input" name="orderNumber" defaultValue={order?.orderNumber || ""} required />
+          <input className="input" name="numero" defaultValue={order?.numero || ""} required />
         </label>
 
         <label className="field">
           <span>Cliente</span>
-          <select className="input" name="customerId" defaultValue={order?.customerId || customers[0]?.id || ""} required>
+          <select className="input" name="cliente_id" defaultValue={order?.cliente_id || customers[0]?.id || ""} required>
             {customers.map((customer) => (
               <option key={customer.id} value={customer.id}>
                 {customer.label}
@@ -119,12 +119,12 @@ export function OrderForm({
 
         <label className="field">
           <span>Fecha</span>
-          <input className="input" type="date" name="date" defaultValue={order?.date || ""} required />
+          <input className="input" type="date" name="fecha" defaultValue={order?.fecha || ""} required />
         </label>
 
         <label className="field">
           <span>Estado</span>
-          <select className="input" name="status" defaultValue={order?.status || "PENDING"}>
+          <select className="input" name="estado" defaultValue={order?.estado || "PENDING"}>
             {ORDER_STATUSES.map((status) => (
               <option key={status.value} value={status.value}>
                 {status.label}
@@ -146,15 +146,15 @@ export function OrderForm({
         </div>
 
         {items.map((item, index) => (
-          <div className="line-item-row" key={`${item.productId}-${index}`}>
+          <div className="line-item-row" key={`${item.producto_id}-${index}`}>
             <select
               className="input"
-              value={item.productId}
-              onChange={(event) => updateItem(index, "productId", event.target.value)}
+              value={item.producto_id}
+              onChange={(event) => updateItem(index, "producto_id", event.target.value)}
             >
               {products.map((product) => (
                 <option key={product.id} value={product.id}>
-                  {product.name} ({product.sku})
+                  {product.nombre} ({product.sku})
                 </option>
               ))}
             </select>
@@ -162,18 +162,18 @@ export function OrderForm({
               className="input"
               type="number"
               min="1"
-              value={item.quantity}
-              onChange={(event) => updateItem(index, "quantity", event.target.value)}
+              value={item.cantidad}
+              onChange={(event) => updateItem(index, "cantidad", event.target.value)}
             />
             <input
               className="input"
               type="number"
               step="0.01"
               min="0"
-              value={item.unitPrice}
-              onChange={(event) => updateItem(index, "unitPrice", event.target.value)}
+              value={item.precio_unitario}
+              onChange={(event) => updateItem(index, "precio_unitario", event.target.value)}
             />
-            <div className="line-total">{formatCurrency(item.quantity * item.unitPrice)}</div>
+            <div className="line-total">{formatCurrency(item.cantidad * item.precio_unitario)}</div>
             <button className="button button-danger" type="button" onClick={() => removeLine(index)}>
               Quitar
             </button>
@@ -183,7 +183,7 @@ export function OrderForm({
 
       <label className="field">
         <span>Notas</span>
-        <textarea className="input textarea" name="notes" defaultValue={order?.notes || ""} />
+        <textarea className="input textarea" name="notas" defaultValue={order?.notas || ""} />
       </label>
 
       <div className="totals-card">

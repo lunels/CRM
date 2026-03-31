@@ -2,22 +2,27 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
 import { parseCsv } from "@/lib/csv";
+import { createSupabaseServerClient } from "@/lib/supabase";
 import { customerSchema } from "@/lib/validation";
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (typeof error === "object" && error && "message" in error && typeof error.message === "string") {
+    return error.message;
+  }
+  return fallback;
+}
 
 function buildCustomerPayload(formData: FormData) {
   return {
-    firstName: String(formData.get("firstName") || ""),
-    lastName: String(formData.get("lastName") || ""),
-    company: String(formData.get("company") || ""),
+    nombre: String(formData.get("nombre") || ""),
     email: String(formData.get("email") || ""),
-    phone: String(formData.get("phone") || ""),
-    address: String(formData.get("address") || ""),
-    city: String(formData.get("city") || ""),
-    postalCode: String(formData.get("postalCode") || ""),
-    country: String(formData.get("country") || ""),
-    notes: String(formData.get("notes") || "")
+    telefono: String(formData.get("telefono") || ""),
+    direccion: String(formData.get("direccion") || ""),
+    ciudad: String(formData.get("ciudad") || ""),
+    codigo_postal: String(formData.get("codigo_postal") || ""),
+    pais: String(formData.get("pais") || ""),
+    notas: String(formData.get("notas") || "")
   };
 }
 
@@ -26,6 +31,7 @@ function getCustomerRedirectPath(id?: string | null) {
 }
 
 export async function saveCustomerAction(formData: FormData) {
+  const supabase = createSupabaseServerClient();
   const id = String(formData.get("id") || "");
   const parsed = customerSchema.safeParse(buildCustomerPayload(formData));
 
@@ -35,20 +41,21 @@ export async function saveCustomerAction(formData: FormData) {
 
   try {
     if (id) {
-      await prisma.customer.update({
-        where: { id },
-        data: parsed.data
-      });
+      const { error } = await supabase.from("clientes").update(parsed.data).eq("id", id);
+      if (error) {
+        throw error;
+      }
     } else {
-      await prisma.customer.create({
-        data: parsed.data
-      });
+      const { error } = await supabase.from("clientes").insert(parsed.data);
+      if (error) {
+        throw error;
+      }
     }
   } catch (error) {
-    const message =
-      error instanceof Error && error.message.includes("Unique constraint")
-        ? "Ya existe un cliente con ese email."
-        : "No se pudo guardar el cliente.";
+    const rawMessage = getErrorMessage(error, "");
+    const message = rawMessage.toLowerCase().includes("duplicate")
+      ? "Ya existe un cliente con ese email."
+      : "No se pudo guardar el cliente.";
     redirect(`${getCustomerRedirectPath(id)}?error=${encodeURIComponent(message)}`);
   }
 
@@ -58,18 +65,22 @@ export async function saveCustomerAction(formData: FormData) {
 }
 
 export async function deleteCustomerAction(formData: FormData) {
+  const supabase = createSupabaseServerClient();
   const id = String(formData.get("id") || "");
   if (!id) {
     redirect(`/customers?error=${encodeURIComponent("Cliente no valido.")}`);
   }
 
   try {
-    await prisma.customer.delete({
-      where: { id }
-    });
-  } catch {
+    const { error } = await supabase.from("clientes").delete().eq("id", id);
+    if (error) {
+      throw error;
+    }
+  } catch (error) {
     redirect(
-      `/customers?error=${encodeURIComponent("No se puede eliminar un cliente con pedidos asociados.")}`
+      `/customers?error=${encodeURIComponent(
+        getErrorMessage(error, "No se puede eliminar un cliente con pedidos asociados.")
+      )}`
     );
   }
 
@@ -85,6 +96,7 @@ export type ImportState = {
 };
 
 export async function importCustomersAction(_: ImportState, formData: FormData): Promise<ImportState> {
+  const supabase = createSupabaseServerClient();
   const file = formData.get("file");
 
   if (!(file instanceof File) || file.size === 0) {
@@ -107,20 +119,18 @@ export async function importCustomersAction(_: ImportState, formData: FormData):
   }
 
   const errors: string[] = [];
-  let imported = 0;
+  const validRows: Array<Record<string, string>> = [];
 
   for (const [index, record] of records.entries()) {
     const parsed = customerSchema.safeParse({
-      firstName: record.nombre || record.first_name || record.firstname || record.name || "",
-      lastName: record.apellidos || record.razon_social || record.last_name || "",
-      company: record.razon_social || record.company || "",
+      nombre: record.nombre || record.name || "",
       email: record.email || "",
-      phone: record.telefono || record.phone || "",
-      address: record.direccion || record.address || "",
-      city: record.ciudad || record.city || "",
-      postalCode: record.codigo_postal || record.postal_code || "",
-      country: record.pais || record.country || "",
-      notes: record.notas || record.notes || ""
+      telefono: record.telefono || record.phone || "",
+      direccion: record.direccion || record.address || "",
+      ciudad: record.ciudad || record.city || "",
+      codigo_postal: record.codigo_postal || record.postal_code || "",
+      pais: record.pais || record.country || "",
+      notas: record.notas || record.notes || ""
     });
 
     if (!parsed.success) {
@@ -128,15 +138,21 @@ export async function importCustomersAction(_: ImportState, formData: FormData):
       continue;
     }
 
-    try {
-      await prisma.customer.upsert({
-        where: { email: parsed.data.email },
-        update: parsed.data,
-        create: parsed.data
-      });
-      imported += 1;
-    } catch {
-      errors.push(`Fila ${index + 2}: no se pudo insertar el cliente.`);
+    validRows.push(parsed.data);
+  }
+
+  let imported = 0;
+
+  if (validRows.length > 0) {
+    const { error, data } = await supabase
+      .from("clientes")
+      .upsert(validRows, { onConflict: "email" })
+      .select("id");
+
+    if (error) {
+      errors.push(`Error general de importacion: ${error.message}`);
+    } else {
+      imported = data?.length || validRows.length;
     }
   }
 

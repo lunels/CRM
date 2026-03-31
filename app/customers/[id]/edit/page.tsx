@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { CustomerForm } from "@/components/CustomerForm";
 import { Notice } from "@/components/Notice";
 import { PageHeader } from "@/components/PageHeader";
-import { prisma } from "@/lib/prisma";
+import { fetchCustomerById } from "@/lib/data";
 
 export default async function EditCustomerPage({
   params,
@@ -13,9 +13,7 @@ export default async function EditCustomerPage({
 }) {
   const { id } = await params;
   const query = await searchParams;
-  const customer = await prisma.customer.findUnique({
-    where: { id }
-  });
+  const customer = await fetchCustomerById(id);
 
   if (!customer) {
     notFound();

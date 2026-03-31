@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { Prisma } from "@prisma/client";
 import { deleteCustomerAction } from "@/lib/actions/customers";
-import { prisma } from "@/lib/prisma";
+import { fetchCustomers } from "@/lib/data";
 import { formatDate, getDisplayName } from "@/lib/utils";
 import { Notice } from "@/components/Notice";
 import { PageHeader } from "@/components/PageHeader";
@@ -15,27 +14,19 @@ export default async function CustomersPage({
   const params = await searchParams;
   const query = params.q?.trim() || "";
   const sort = params.sort || "newest";
-
-  const where: Prisma.CustomerWhereInput = query
-    ? {
-        OR: [
-          { firstName: { contains: query } },
-          { lastName: { contains: query } },
-          { email: { contains: query } },
-          { phone: { contains: query } }
-        ]
+  const customers = (await fetchCustomers())
+    .filter((customer) => {
+      if (!query) {
+        return true;
       }
-    : {};
-
-  const orderBy =
-    sort === "name"
-      ? [{ firstName: "asc" as const }]
-      : [{ createdAt: "desc" as const }];
-
-  const customers = await prisma.customer.findMany({
-    where,
-    orderBy
-  });
+      const haystack = `${customer.nombre} ${customer.email} ${customer.telefono}`.toLowerCase();
+      return haystack.includes(query.toLowerCase());
+    })
+    .sort((left, right) =>
+      sort === "name"
+        ? left.nombre.localeCompare(right.nombre, "es")
+        : new Date(right.created_at).getTime() - new Date(left.created_at).getTime()
+    );
 
   return (
     <div className="page-stack">
@@ -85,9 +76,9 @@ export default async function CustomersPage({
                 <tr key={customer.id}>
                   <td>{getDisplayName(customer)}</td>
                   <td>{customer.email}</td>
-                  <td>{customer.phone}</td>
-                  <td>{customer.city || "-"}</td>
-                  <td>{formatDate(customer.createdAt)}</td>
+                  <td>{customer.telefono}</td>
+                  <td>{customer.ciudad || "-"}</td>
+                  <td>{formatDate(customer.created_at)}</td>
                   <td className="row-actions">
                     <Link href={`/customers/${customer.id}/edit`} className="button button-secondary">
                       Editar

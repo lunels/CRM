@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { Prisma } from "@prisma/client";
-import { prisma } from "@/lib/prisma";
+import { fetchOrders } from "@/lib/data";
 import { formatCurrency, formatDate, getDisplayName } from "@/lib/utils";
 import { Notice } from "@/components/Notice";
 import { PageHeader } from "@/components/PageHeader";
@@ -14,36 +13,19 @@ export default async function OrdersPage({
   const params = await searchParams;
   const query = params.q?.trim() || "";
   const sort = params.sort || "newest";
-  const normalizedQuery = query.toUpperCase();
-  const statusSearch = ["PENDING", "CONFIRMED", "SHIPPED", "COMPLETED", "CANCELLED"].includes(normalizedQuery)
-    ? normalizedQuery
-    : null;
-
-  const where: Prisma.OrderWhereInput = query
-    ? {
-        OR: [
-          { orderNumber: { contains: query } },
-          { customer: { firstName: { contains: query } } },
-          { customer: { lastName: { contains: query } } },
-          { customer: { company: { contains: query } } },
-          ...(statusSearch ? [{ status: { equals: statusSearch as never } }] : [])
-        ]
+  const orders = (await fetchOrders())
+    .filter((order) => {
+      if (!query) {
+        return true;
       }
-    : {};
-
-  const orderBy =
-    sort === "oldest"
-      ? [{ date: "asc" as const }]
-      : [{ date: "desc" as const }];
-
-  const orders = await prisma.order.findMany({
-    where,
-    orderBy,
-    include: {
-      customer: true,
-      items: true
-    }
-  });
+      const haystack = `${order.numero} ${order.estado} ${order.cliente?.nombre || ""}`.toLowerCase();
+      return haystack.includes(query.toLowerCase());
+    })
+    .sort((left, right) =>
+      sort === "oldest"
+        ? new Date(left.fecha).getTime() - new Date(right.fecha).getTime()
+        : new Date(right.fecha).getTime() - new Date(left.fecha).getTime()
+    );
 
   return (
     <div className="page-stack">
@@ -86,19 +68,19 @@ export default async function OrdersPage({
                 </td>
               </tr>
             ) : (
-              orders.map((order) => (
-                <tr key={order.id}>
-                  <td>
-                    <Link href={`/orders/${order.id}`}>{order.orderNumber}</Link>
-                  </td>
-                  <td>{getDisplayName(order.customer)}</td>
-                  <td>{formatDate(order.date)}</td>
-                  <td>{order.status}</td>
-                  <td>{order.items.length}</td>
-                  <td>{formatCurrency(order.total.toString())}</td>
-                </tr>
-              ))
-            )}
+                orders.map((order) => (
+                  <tr key={order.id}>
+                    <td>
+                      <Link href={`/orders/${order.id}`}>{order.numero}</Link>
+                    </td>
+                    <td>{order.cliente ? getDisplayName(order.cliente) : "-"}</td>
+                    <td>{formatDate(order.fecha)}</td>
+                    <td>{order.estado}</td>
+                    <td>{order.lineas?.length || 0}</td>
+                    <td>{formatCurrency(order.total)}</td>
+                  </tr>
+                ))
+              )}
           </tbody>
         </table>
       </div>

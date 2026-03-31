@@ -18,10 +18,6 @@ pnpm-debug.log*
 .env.test.local
 .env.production.local
 
-# prisma
-prisma/dev.db
-prisma/dev.db-journal
-
 # macOS
 .DS_Store
 

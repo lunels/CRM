@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import { fetchActiveProducts, fetchCustomers, fetchOrderById } from "@/lib/data";
 import { getDisplayName } from "@/lib/utils";
 import { Notice } from "@/components/Notice";
 import { OrderForm } from "@/components/OrderForm";
@@ -16,14 +16,9 @@ export default async function EditOrderPage({
   const query = await searchParams;
 
   const [customers, products, order] = await Promise.all([
-    prisma.customer.findMany({ orderBy: { firstName: "asc" } }),
-    prisma.product.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
-    prisma.order.findUnique({
-      where: { id },
-      include: {
-        items: true
-      }
-    })
+    fetchCustomers(),
+    fetchActiveProducts(),
+    fetchOrderById(id)
   ]);
 
   if (!order) {
@@ -53,21 +48,21 @@ export default async function EditOrderPage({
         }))}
         products={products.map((product) => ({
           id: product.id,
-          name: product.name,
+          nombre: product.nombre,
           sku: product.sku,
-          price: Number(product.price)
+          precio: product.precio
         }))}
         order={{
           id: order.id,
-          orderNumber: order.orderNumber,
-          customerId: order.customerId,
-          date: order.date.toISOString().slice(0, 10),
-          status: order.status,
-          notes: order.notes,
-          items: order.items.map((item) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            unitPrice: Number(item.unitPrice)
+          numero: order.numero,
+          cliente_id: order.cliente_id,
+          fecha: order.fecha.slice(0, 10),
+          estado: order.estado,
+          notas: order.notas,
+          items: (order.lineas || []).map((item) => ({
+            producto_id: item.producto_id,
+            cantidad: item.cantidad,
+            precio_unitario: item.precio_unitario
           }))
         }}
       />

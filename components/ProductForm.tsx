@@ -1,14 +1,14 @@
 import { saveProductAction } from "@/lib/actions/products";
 
-type ProductFormData = {
+export type ProductFormData = {
   id?: string;
-  name?: string;
+  nombre?: string;
   sku?: string;
-  description?: string | null;
-  price?: string | number;
+  descripcion?: string | null;
+  precio?: string | number;
   stock?: number;
-  category?: string | null;
-  isActive?: boolean;
+  categoria?: string | null;
+  activo?: boolean;
 };
 
 export function ProductForm({ product }: { product?: ProductFormData }) {
@@ -18,7 +18,7 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
 
       <label className="field">
         <span>Nombre</span>
-        <input className="input" name="name" defaultValue={product?.name || ""} required />
+        <input className="input" name="nombre" defaultValue={product?.nombre || ""} required />
       </label>
 
       <label className="field">
@@ -33,8 +33,8 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
           type="number"
           step="0.01"
           min="0"
-          name="price"
-          defaultValue={product?.price?.toString() || "0"}
+          name="precio"
+          defaultValue={product?.precio?.toString() || "0"}
           required
         />
       </label>
@@ -46,17 +46,17 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
 
       <label className="field">
         <span>Categoria</span>
-        <input className="input" name="category" defaultValue={product?.category || ""} />
+        <input className="input" name="categoria" defaultValue={product?.categoria || ""} />
       </label>
 
       <label className="field checkbox-field">
-        <input type="checkbox" name="isActive" defaultChecked={product?.isActive ?? true} />
+        <input type="checkbox" name="activo" defaultChecked={product?.activo ?? true} />
         <span>Producto activo</span>
       </label>
 
       <label className="field field-full">
         <span>Descripcion</span>
-        <textarea className="input textarea" name="description" defaultValue={product?.description || ""} />
+        <textarea className="input textarea" name="descripcion" defaultValue={product?.descripcion || ""} />
       </label>
 
       <div className="field-full form-actions">

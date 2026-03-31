@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { fetchActiveProducts, fetchCustomers } from "@/lib/data";
 import { getDisplayName } from "@/lib/utils";
 import { Notice } from "@/components/Notice";
 import { OrderForm } from "@/components/OrderForm";
@@ -11,8 +11,8 @@ export default async function NewOrderPage({
 }) {
   const params = await searchParams;
   const [customers, products] = await Promise.all([
-    prisma.customer.findMany({ orderBy: { firstName: "asc" } }),
-    prisma.product.findMany({ where: { isActive: true }, orderBy: { name: "asc" } })
+    fetchCustomers(),
+    fetchActiveProducts()
   ]);
 
   if (customers.length === 0 || products.length === 0) {
@@ -38,13 +38,13 @@ export default async function NewOrderPage({
         }))}
         products={products.map((product) => ({
           id: product.id,
-          name: product.name,
+          nombre: product.nombre,
           sku: product.sku,
-          price: Number(product.price)
+          precio: product.precio
         }))}
         order={{
-          date: new Date().toISOString().slice(0, 10),
-          status: "PENDING"
+          fecha: new Date().toISOString().slice(0, 10),
+          estado: "PENDING"
         }}
       />
     </div>
