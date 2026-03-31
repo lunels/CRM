@@ -148,6 +148,10 @@ textarea {
   box-shadow: none;
 }
 
+.compact-card {
+  padding: 1rem;
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -166,6 +170,12 @@ textarea {
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
+}
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
 }
 
 .input,
@@ -370,6 +380,7 @@ textarea {
   }
 
   .stats-grid,
+  .quick-actions-grid,
   .detail-grid,
   .totals-card,
   .detail-list {

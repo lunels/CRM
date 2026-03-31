@@ -28,6 +28,29 @@ export default async function DashboardPage() {
         <section className="card">
           <div className="section-heading">
             <div>
+              <h3>Acciones rapidas</h3>
+              <p className="muted">Atajos inspirados en el flujo generado con Anything.</p>
+            </div>
+          </div>
+          <div className="quick-actions-grid">
+            <Link href="/pedidos/nuevo" className="button">
+              Crear pedido
+            </Link>
+            <Link href="/clientes/nuevo" className="button button-secondary">
+              Crear cliente
+            </Link>
+            <Link href="/productos/nuevo" className="button button-secondary">
+              Crear producto
+            </Link>
+            <Link href="/importar" className="button button-secondary">
+              Importar CSV
+            </Link>
+          </div>
+        </section>
+
+        <section className="card">
+          <div className="section-heading">
+            <div>
               <h3>Pedidos recientes</h3>
               <p className="muted">Ultimos movimientos registrados.</p>
             </div>

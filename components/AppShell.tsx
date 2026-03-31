@@ -5,9 +5,10 @@ import { usePathname } from "next/navigation";
 
 const navigation = [
   { href: "/", label: "Dashboard" },
-  { href: "/customers", label: "Clientes" },
-  { href: "/products", label: "Productos" },
-  { href: "/orders", label: "Pedidos" }
+  { href: "/clientes", label: "Clientes" },
+  { href: "/productos", label: "Productos" },
+  { href: "/pedidos", label: "Pedidos" },
+  { href: "/importar", label: "Importar CSV" }
 ];
 
 function NavLink({ href, label }: { href: string; label: string }) {
