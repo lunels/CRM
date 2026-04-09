@@ -4,6 +4,7 @@ type Action = {
   href: string;
   label: string;
   secondary?: boolean;
+  icon?: React.ReactNode;
 };
 
 export function PageHeader({
@@ -19,7 +20,7 @@ export function PageHeader({
     <div className="page-header">
       <div>
         <h2>{title}</h2>
-        {description ? <p className="muted">{description}</p> : null}
+        {description ? <p className="muted" style={{ marginTop: "0.25rem" }}>{description}</p> : null}
       </div>
       {actions?.length ? (
         <div className="page-header-actions">
@@ -29,6 +30,7 @@ export function PageHeader({
               href={action.href}
               className={action.secondary ? "button button-secondary" : "button"}
             >
+              {action.icon}
               {action.label}
             </Link>
           ))}

@@ -61,7 +61,7 @@ export default async function CustomersPage({
               <th>Telefono</th>
               <th>Ciudad</th>
               <th>Creado</th>
-              <th />
+              <th style={{ width: "1%" }} />
             </tr>
           </thead>
           <tbody>
@@ -74,18 +74,18 @@ export default async function CustomersPage({
             ) : (
               customers.map((customer) => (
                 <tr key={customer.id}>
-                  <td>{getDisplayName(customer)}</td>
-                  <td>{customer.email}</td>
-                  <td>{customer.telefono}</td>
-                  <td>{customer.ciudad || "-"}</td>
-                  <td>{formatDate(customer.created_at)}</td>
-                  <td className="row-actions">
-                    <Link href={`/customers/${customer.id}/edit`} className="button button-secondary">
+                  <td style={{ fontWeight: 500 }}>{getDisplayName(customer)}</td>
+                  <td style={{ color: "var(--text-secondary)" }}>{customer.email}</td>
+                  <td style={{ color: "var(--text-secondary)" }}>{customer.telefono}</td>
+                  <td style={{ color: "var(--text-secondary)" }}>{customer.ciudad || "-"}</td>
+                  <td style={{ color: "var(--muted)" }}>{formatDate(customer.created_at)}</td>
+                  <td className="row-actions" style={{ whiteSpace: "nowrap" }}>
+                    <Link href={`/customers/${customer.id}/edit`} className="button button-secondary button-sm">
                       Editar
                     </Link>
                     <form action={deleteCustomerAction}>
                       <input type="hidden" name="id" value={customer.id} />
-                      <button className="button button-danger" type="submit">
+                      <button className="button button-danger button-sm" type="submit">
                         Eliminar
                       </button>
                     </form>

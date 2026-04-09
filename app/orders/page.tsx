@@ -5,6 +5,20 @@ import { Notice } from "@/components/Notice";
 import { PageHeader } from "@/components/PageHeader";
 import { SearchBar } from "@/components/SearchBar";
 
+function getStatusBadge(status: string) {
+  const statusLower = status.toLowerCase();
+  if (statusLower === "completado" || statusLower === "entregado") {
+    return <span className="badge badge-success">{status}</span>;
+  }
+  if (statusLower === "pendiente" || statusLower === "en proceso") {
+    return <span className="badge badge-warning">{status}</span>;
+  }
+  if (statusLower === "cancelado") {
+    return <span className="badge badge-danger">{status}</span>;
+  }
+  return <span className="badge badge-default">{status}</span>;
+}
+
 export default async function OrdersPage({
   searchParams
 }: {
@@ -56,8 +70,8 @@ export default async function OrdersPage({
               <th>Cliente</th>
               <th>Fecha</th>
               <th>Estado</th>
-              <th>Lineas</th>
-              <th>Total</th>
+              <th style={{ textAlign: "center" }}>Lineas</th>
+              <th style={{ textAlign: "right" }}>Total</th>
             </tr>
           </thead>
           <tbody>
@@ -68,19 +82,19 @@ export default async function OrdersPage({
                 </td>
               </tr>
             ) : (
-                orders.map((order) => (
-                  <tr key={order.id}>
-                    <td>
-                      <Link href={`/orders/${order.id}`}>{order.numero}</Link>
-                    </td>
-                    <td>{order.cliente ? getDisplayName(order.cliente) : "-"}</td>
-                    <td>{formatDate(order.fecha)}</td>
-                    <td>{order.estado}</td>
-                    <td>{order.lineas?.length || 0}</td>
-                    <td>{formatCurrency(order.total)}</td>
-                  </tr>
-                ))
-              )}
+              orders.map((order) => (
+                <tr key={order.id}>
+                  <td>
+                    <Link href={`/orders/${order.id}`}>{order.numero}</Link>
+                  </td>
+                  <td style={{ fontWeight: 500 }}>{order.cliente ? getDisplayName(order.cliente) : "-"}</td>
+                  <td style={{ color: "var(--text-secondary)" }}>{formatDate(order.fecha)}</td>
+                  <td>{getStatusBadge(order.estado)}</td>
+                  <td style={{ textAlign: "center", color: "var(--text-secondary)" }}>{order.lineas?.length || 0}</td>
+                  <td style={{ textAlign: "right", fontWeight: 600 }}>{formatCurrency(order.total)}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

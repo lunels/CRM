@@ -8,10 +8,10 @@ export function StatCard({
   help?: string;
 }) {
   return (
-    <div className="card stat-card">
-      <p className="muted">{label}</p>
-      <strong>{value}</strong>
-      {help ? <span className="muted">{help}</span> : null}
+    <div className="stat-card">
+      <span className="stat-label">{label}</span>
+      <span className="stat-value">{value}</span>
+      {help ? <span className="stat-help">{help}</span> : null}
     </div>
   );
 }
