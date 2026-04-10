@@ -32,9 +32,10 @@ export default async function CustomersPage({
     <div className="page-stack">
       <PageHeader
         title="Clientes"
-        description="Consulta, crea y actualiza la base de clientes."
+        description="Base central del comercial para relacionar presupuestos, comandas y proveedores."
         actions={[
           { href: "/customers/import", label: "Importar CSV", secondary: true },
+          { href: "/presupuestos/nuevo", label: "Nuevo presupuesto", secondary: true },
           { href: "/customers/new", label: "Nuevo cliente" }
         ]}
       />

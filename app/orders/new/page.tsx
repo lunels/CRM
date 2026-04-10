@@ -18,9 +18,9 @@ export default async function NewOrderPage({
   if (customers.length === 0 || products.length === 0) {
     return (
       <div className="page-stack">
-        <PageHeader title="Nuevo pedido" description="Crea un pedido con una o varias lineas de producto." />
+        <PageHeader title="Nuevo presupuesto" description="Crea un presupuesto con una o varias lineas de producto." />
         <Notice
-          message="Necesitas al menos un cliente y un producto activo antes de crear pedidos."
+          message="Necesitas al menos un cliente y un producto activo antes de crear presupuestos."
           tone="error"
         />
       </div>
@@ -29,7 +29,7 @@ export default async function NewOrderPage({
 
   return (
     <div className="page-stack">
-      <PageHeader title="Nuevo pedido" description="Crea un pedido con una o varias lineas de producto." />
+      <PageHeader title="Nuevo presupuesto" description="Crea un presupuesto para un cliente con lineas, descuentos y observaciones." />
       <Notice message={params.error} tone="error" />
       <OrderForm
         customers={customers.map((customer) => ({

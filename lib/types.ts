@@ -13,8 +13,12 @@ export type Customer = {
 
 export type Product = {
   id: string;
+  proveedor: string;
   nombre: string;
   sku: string;
+  referencia_proveedor: string;
+  familia: string | null;
+  imagen_url?: string | null;
   descripcion: string | null;
   precio: number;
   stock: number;
@@ -46,4 +50,23 @@ export type Order = {
   created_at: string;
   cliente?: Pick<Customer, "id" | "nombre" | "email" | "telefono"> | null;
   lineas?: OrderLine[];
+};
+
+export type Provider = {
+  id: string;
+  nombre: string;
+  codigo: string;
+  principal: boolean;
+  total_productos: number;
+  created_at: string;
+};
+
+export type Commission = {
+  id: string;
+  fecha: string;
+  proveedor: string;
+  cliente: string;
+  porcentaje: number;
+  importe: number;
+  observaciones: string | null;
 };

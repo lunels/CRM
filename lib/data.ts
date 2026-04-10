@@ -1,6 +1,6 @@
 import { unstable_noStore as noStore } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase";
-import type { Customer, Order, OrderLine, Product } from "@/lib/types";
+import type { Commission, Customer, Order, OrderLine, Product, Provider } from "@/lib/types";
 
 function toNumber(value: number | string | null | undefined) {
   if (typeof value === "number") {
@@ -27,8 +27,12 @@ function normalizeCustomer(row: any): Customer {
 function normalizeProduct(row: any): Product {
   return {
     id: row.id,
+    proveedor: row.proveedor || "ENPA",
     nombre: row.nombre,
     sku: row.sku,
+    referencia_proveedor: row.referencia_proveedor || row.sku,
+    familia: row.familia || row.categoria,
+    imagen_url: row.imagen_url || null,
     descripcion: row.descripcion,
     precio: toNumber(row.precio),
     stock: row.stock,
@@ -132,6 +136,55 @@ export async function fetchProductById(id: string) {
     throw new Error(error.message);
   }
   return data ? normalizeProduct(data) : null;
+}
+
+export async function fetchProviders() {
+  noStore();
+  const products = await fetchProducts();
+  const providersMap = new Map<string, Provider>();
+
+  for (const product of products) {
+    if (!providersMap.has(product.proveedor)) {
+      providersMap.set(product.proveedor, {
+        id: product.proveedor.toLowerCase(),
+        nombre: product.proveedor,
+        codigo: product.proveedor === "ENPA" ? "ENPA" : product.proveedor.toUpperCase(),
+        principal: product.proveedor === "ENPA",
+        total_productos: 0,
+        created_at: new Date().toISOString()
+      });
+    }
+
+    providersMap.get(product.proveedor)!.total_productos += 1;
+  }
+
+  if (providersMap.size === 0) {
+    providersMap.set("ENPA", {
+      id: "enpa",
+      nombre: "ENPA",
+      codigo: "ENPA",
+      principal: true,
+      total_productos: 0,
+      created_at: new Date().toISOString()
+    });
+  }
+
+  return Array.from(providersMap.values());
+}
+
+export async function fetchCommissionPreview() {
+  noStore();
+  const orders = await fetchOrders();
+
+  return orders.slice(0, 20).map<Commission>((order) => ({
+    id: `com-${order.id}`,
+    fecha: order.fecha,
+    proveedor: "ENPA",
+    cliente: order.cliente?.nombre || "Cliente",
+    porcentaje: 0,
+    importe: 0,
+    observaciones: "Pendiente de registrar porcentaje e importe real."
+  }));
 }
 
 export async function fetchOrders() {

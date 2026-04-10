@@ -36,7 +36,7 @@ export default async function ProductsPage({
     <div className="page-stack">
       <PageHeader
         title="Productos"
-        description="Gestiona el catalogo y el stock disponible."
+        description="Catalogo completo por proveedor para buscar, filtrar y seleccionar productos con rapidez."
         actions={[
           { href: "/products/import", label: "Importar CSV", secondary: true },
           { href: "/products/new", label: "Nuevo producto" }
@@ -62,8 +62,9 @@ export default async function ProductsPage({
           <thead>
             <tr>
               <th>Producto</th>
-              <th>SKU</th>
-              <th>Categoria</th>
+              <th>Proveedor</th>
+              <th>Referencia</th>
+              <th>Familia</th>
               <th style={{ textAlign: "right" }}>Precio</th>
               <th style={{ textAlign: "right" }}>Stock</th>
               <th>Estado</th>
@@ -73,7 +74,7 @@ export default async function ProductsPage({
           <tbody>
             {products.length === 0 ? (
               <tr>
-                <td colSpan={7} className="empty-cell">
+                <td colSpan={8} className="empty-cell">
                   No se han encontrado productos.
                 </td>
               </tr>
@@ -84,8 +85,9 @@ export default async function ProductsPage({
                     <span style={{ fontWeight: 500 }}>{product.nombre}</span>
                     <div className="table-subtext">{formatDate(product.created_at)}</div>
                   </td>
-                  <td><code style={{ background: "var(--surface-alt)", padding: "0.125rem 0.375rem", borderRadius: "4px", fontSize: "0.8125rem" }}>{product.sku}</code></td>
-                  <td style={{ color: "var(--text-secondary)" }}>{product.categoria || "-"}</td>
+                  <td style={{ color: "var(--text-secondary)" }}>{product.proveedor}</td>
+                  <td><code style={{ background: "var(--surface-alt)", padding: "0.125rem 0.375rem", borderRadius: "4px", fontSize: "0.8125rem" }}>{product.referencia_proveedor}</code></td>
+                  <td style={{ color: "var(--text-secondary)" }}>{product.familia || "-"}</td>
                   <td style={{ textAlign: "right", fontWeight: 500 }}>{formatCurrency(product.precio)}</td>
                   <td style={{ textAlign: "right", color: product.stock < 10 ? "var(--warning)" : "var(--text-secondary)" }}>{product.stock}</td>
                   <td>

@@ -10,12 +10,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "CRM - Gestion Comercial",
-  description: "CRM moderno para gestionar clientes, productos y pedidos."
+  title: "CRM Comercial",
+  description: "CRM comercial para clientes, proveedores, presupuestos, comandas y comisiones."
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0a0a",
+  themeColor: "#f6f3ee",
   width: "device-width",
   initialScale: 1
 };

@@ -29,41 +29,44 @@ export default async function DashboardPage() {
     return (
       <div className="page-stack">
         <PageHeader
-          title="Dashboard"
-          description="Resumen del negocio y acceso rapido a las operaciones habituales."
+          title="Centro Comercial"
+          description="Panel principal del comercial para clientes, proveedores, presupuestos, comandas y control interno."
         />
 
         <section className="stats-grid">
-          <StatCard label="Clientes" value={customerCount} help="Base de clientes registrada" />
-          <StatCard label="Productos" value={productCount} help="Catalogo disponible" />
-          <StatCard label="Pedidos" value={orderCount} help="Pedidos creados en el sistema" />
+          <StatCard label="Clientes" value={customerCount} help="Base de clientes del comercial" />
+          <StatCard label="Productos" value={productCount} help="Catalogo disponible por proveedor" />
+          <StatCard label="Presupuestos" value={orderCount} help="Documentos comerciales registrados" />
         </section>
 
         <section className="card">
           <div className="section-heading">
             <div>
               <h3>Acciones rapidas</h3>
-              <p className="muted">Accesos directos a las funciones mas utilizadas.</p>
+              <p className="muted">Flujo comercial: presupuesto, comanda y control interno.</p>
             </div>
           </div>
           <div className="quick-actions-grid">
-            <Link href="/orders/new" className="button">
+            <Link href="/presupuestos/nuevo" className="button">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "16px", height: "16px" }}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
               </svg>
-              Nuevo pedido
+              Nuevo presupuesto
             </Link>
-            <Link href="/customers/new" className="button button-secondary">
+            <Link href="/clientes/nuevo" className="button button-secondary">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "16px", height: "16px" }}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
               </svg>
               Nuevo cliente
             </Link>
-            <Link href="/products/new" className="button button-secondary">
+            <Link href="/productos/nuevo" className="button button-secondary">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "16px", height: "16px" }}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 11.625l2.25-2.25M12 11.625l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
               </svg>
               Nuevo producto
+            </Link>
+            <Link href="/comandas" className="button button-secondary">
+              Ver comandas
             </Link>
             <Link href="/importar" className="button button-secondary">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "16px", height: "16px" }}>
@@ -77,10 +80,10 @@ export default async function DashboardPage() {
         <section className="card">
           <div className="section-heading">
             <div>
-              <h3>Pedidos recientes</h3>
-              <p className="muted">Ultimos movimientos registrados en el sistema.</p>
+              <h3>Presupuestos recientes</h3>
+              <p className="muted">Ultimos documentos preparados para cliente.</p>
             </div>
-            <Link href="/orders" className="button button-secondary button-sm">
+            <Link href="/presupuestos" className="button button-secondary button-sm">
               Ver todos
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "14px", height: "14px" }}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
@@ -92,7 +95,7 @@ export default async function DashboardPage() {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Pedido</th>
+                  <th>Presupuesto</th>
                   <th>Cliente</th>
                   <th>Fecha</th>
                   <th>Estado</th>

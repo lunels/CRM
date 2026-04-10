@@ -44,16 +44,16 @@ export default async function OrdersPage({
   return (
     <div className="page-stack">
       <PageHeader
-        title="Pedidos"
-        description="Controla el estado de los pedidos y consulta su detalle."
-        actions={[{ href: "/orders/new", label: "Nuevo pedido" }]}
+        title="Presupuestos"
+        description="Documento comercial para cliente con lineas, descuentos y total final."
+        actions={[{ href: "/orders/new", label: "Nuevo presupuesto" }]}
       />
 
       <Notice message={params.success} />
       <Notice message={params.error} tone="error" />
 
       <SearchBar
-        placeholder="Buscar por numero, cliente o estado"
+        placeholder="Buscar por ID presupuesto, cliente o estado"
         search={query}
         sort={sort}
         sortOptions={[
@@ -66,7 +66,7 @@ export default async function OrdersPage({
         <table className="table">
           <thead>
             <tr>
-              <th>Pedido</th>
+              <th>ID presupuesto</th>
               <th>Cliente</th>
               <th>Fecha</th>
               <th>Estado</th>
@@ -78,7 +78,7 @@ export default async function OrdersPage({
             {orders.length === 0 ? (
               <tr>
                 <td colSpan={6} className="empty-cell">
-                  No se han encontrado pedidos.
+                  No se han encontrado presupuestos.
                 </td>
               </tr>
             ) : (

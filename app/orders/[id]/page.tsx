@@ -40,9 +40,12 @@ export default async function OrderDetailPage({
   return (
     <div className="page-stack">
       <PageHeader
-        title={`Pedido ${order.numero}`}
-        description={`Detalle completo del pedido para ${order.cliente ? getDisplayName(order.cliente) : "cliente"}.`}
-        actions={[{ href: `/orders/${order.id}/edit`, label: "Editar pedido" }]}
+        title={`Presupuesto ${order.numero}`}
+        description={`Documento comercial preparado para ${order.cliente ? getDisplayName(order.cliente) : "cliente"}.`}
+        actions={[
+          { href: `/comandas/${order.id}`, label: "Ver comanda", secondary: true },
+          { href: `/orders/${order.id}/edit`, label: "Editar presupuesto" }
+        ]}
       />
 
       <Notice message={query.success} />
@@ -52,10 +55,10 @@ export default async function OrderDetailPage({
         <section className="card form-stack">
           <div className="section-heading">
             <div>
-              <h3 style={{ fontWeight: 600 }}>Resumen</h3>
-              <p className="muted">Informacion general y estado del pedido.</p>
+              <h3 style={{ fontWeight: 600 }}>Resumen del presupuesto</h3>
+              <p className="muted">Informacion general del documento para cliente.</p>
             </div>
-            <Link href="/orders" className="button button-secondary button-sm">
+            <Link href="/presupuestos" className="button button-secondary button-sm">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "14px", height: "14px" }}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
               </svg>
@@ -101,11 +104,11 @@ export default async function OrderDetailPage({
               <strong style={{ fontSize: "1.125rem" }}>{formatCurrency(order.subtotal)}</strong>
             </div>
             <div>
-              <span className="muted">Impuestos</span>
-              <strong style={{ fontSize: "1.125rem" }}>{formatCurrency(order.impuestos)}</strong>
+              <span className="muted">Descuento total aplicado</span>
+              <strong style={{ fontSize: "1.125rem" }}>{formatCurrency(0)}</strong>
             </div>
             <div>
-              <span className="muted">Total</span>
+              <span className="muted">Total final</span>
               <strong style={{ fontSize: "1.25rem", color: "var(--primary)" }}>{formatCurrency(order.total)}</strong>
             </div>
           </div>
@@ -121,8 +124,8 @@ export default async function OrderDetailPage({
         <section className="card">
           <div className="section-heading">
             <div>
-              <h3 style={{ fontWeight: 600 }}>Lineas del pedido</h3>
-              <p className="muted">Desglose de productos incluidos.</p>
+              <h3 style={{ fontWeight: 600 }}>Lineas del presupuesto</h3>
+              <p className="muted">Desglose visual para cliente con precios y descuento.</p>
             </div>
           </div>
 
@@ -130,18 +133,22 @@ export default async function OrderDetailPage({
             <table className="table">
               <thead>
                 <tr>
-                  <th>Producto</th>
+                  <th>Referencia proveedor</th>
+                  <th>Descripcion</th>
                   <th style={{ textAlign: "center" }}>Cantidad</th>
-                  <th style={{ textAlign: "right" }}>Precio unitario</th>
-                  <th style={{ textAlign: "right" }}>Total linea</th>
+                  <th style={{ textAlign: "right" }}>Precio antes dto.</th>
+                  <th style={{ textAlign: "right" }}>Descuento</th>
+                  <th style={{ textAlign: "right" }}>Precio final</th>
                 </tr>
               </thead>
               <tbody>
                 {order.lineas?.map((item) => (
                   <tr key={item.id}>
+                    <td><code style={{ background: "var(--surface-alt)", padding: "0.125rem 0.375rem", borderRadius: "4px", fontSize: "0.8125rem" }}>{item.producto?.sku || "-"}</code></td>
                     <td style={{ fontWeight: 500 }}>{item.producto?.nombre || "-"}</td>
                     <td style={{ textAlign: "center" }}>{item.cantidad}</td>
                     <td style={{ textAlign: "right", color: "var(--text-secondary)" }}>{formatCurrency(item.precio_unitario)}</td>
+                    <td style={{ textAlign: "right", color: "var(--muted)" }}>{formatCurrency(0)}</td>
                     <td style={{ textAlign: "right", fontWeight: 600 }}>{formatCurrency(item.total)}</td>
                   </tr>
                 ))}
