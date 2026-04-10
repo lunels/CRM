@@ -19,13 +19,17 @@ alter table public.clientes add column if not exists cliente_proveedor_id text;
 create table if not exists public.productos (
   id uuid primary key default gen_random_uuid(),
   proveedor text not null default 'ENPA',
-  nombre text not null,
-  sku text not null unique,
+  nombre text,
+  sku text,
+  referencia text unique,
   referencia_proveedor text,
   familia text,
+  origen_familia text,
   imagen_url text,
   descripcion text,
   precio numeric(10, 2) not null default 0,
+  estado text default 'Activo',
+  observaciones text,
   stock integer not null default 0,
   categoria text,
   activo boolean not null default true,
@@ -36,9 +40,25 @@ alter table public.productos add column if not exists proveedor text;
 alter table public.productos alter column proveedor set default 'ENPA';
 update public.productos set proveedor = 'ENPA' where proveedor is null;
 alter table public.productos alter column proveedor set not null;
+alter table public.productos alter column nombre drop not null;
+alter table public.productos alter column sku drop not null;
+alter table public.productos add column if not exists referencia text;
+update public.productos set referencia = coalesce(referencia, referencia_proveedor, sku) where referencia is null;
+create unique index if not exists productos_referencia_idx on public.productos (referencia);
 alter table public.productos add column if not exists referencia_proveedor text;
+update public.productos set referencia_proveedor = coalesce(referencia_proveedor, referencia) where referencia_proveedor is null;
 alter table public.productos add column if not exists familia text;
 alter table public.productos add column if not exists imagen_url text;
+alter table public.productos add column if not exists origen_familia text;
+update public.productos set origen_familia = coalesce(origen_familia, proveedor) where origen_familia is null;
+alter table public.productos add column if not exists observaciones text;
+alter table public.productos add column if not exists estado text;
+update public.productos
+set estado = case
+  when estado is not null then estado
+  when activo = false then 'Inactivo'
+  else 'Activo'
+end;
 
 create table if not exists public.pedidos (
   id uuid primary key default gen_random_uuid(),
@@ -77,6 +97,10 @@ create index if not exists clientes_nombre_idx on public.clientes (nombre);
 create index if not exists clientes_email_idx on public.clientes (email);
 create index if not exists productos_nombre_idx on public.productos (nombre);
 create index if not exists productos_sku_idx on public.productos (sku);
+drop index if exists productos_referencia_lookup_idx;
+create index if not exists productos_proveedor_idx on public.productos (proveedor);
+create index if not exists productos_familia_idx on public.productos (familia);
+create index if not exists productos_estado_idx on public.productos (estado);
 create index if not exists pedidos_numero_idx on public.pedidos (numero);
 create index if not exists pedidos_cliente_id_idx on public.pedidos (cliente_id);
 create index if not exists pedido_lineas_pedido_id_idx on public.pedido_lineas (pedido_id);

@@ -2,13 +2,14 @@ import { saveProductAction } from "@/lib/actions/products";
 
 export type ProductFormData = {
   id?: string;
-  nombre?: string;
-  sku?: string;
+  proveedor?: string;
+  referencia?: string;
   descripcion?: string | null;
+  familia?: string | null;
   precio?: string | number;
-  stock?: number;
-  categoria?: string | null;
-  activo?: boolean;
+  estado?: string;
+  origen_familia?: string | null;
+  observaciones?: string | null;
 };
 
 export function ProductForm({ product }: { product?: ProductFormData }) {
@@ -17,13 +18,18 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
       <input type="hidden" name="id" value={product?.id || ""} />
 
       <label className="field">
-        <span>Nombre</span>
-        <input className="input" name="nombre" defaultValue={product?.nombre || ""} required />
+        <span>Proveedor</span>
+        <input className="input" name="proveedor" defaultValue={product?.proveedor || "ENPA"} required />
       </label>
 
       <label className="field">
-        <span>SKU / referencia</span>
-        <input className="input" name="sku" defaultValue={product?.sku || ""} required />
+        <span>Referencia</span>
+        <input className="input" name="referencia" defaultValue={product?.referencia || ""} required />
+      </label>
+
+      <label className="field">
+        <span>Familia</span>
+        <input className="input" name="familia" defaultValue={product?.familia || ""} />
       </label>
 
       <label className="field">
@@ -40,23 +46,27 @@ export function ProductForm({ product }: { product?: ProductFormData }) {
       </label>
 
       <label className="field">
-        <span>Stock</span>
-        <input className="input" type="number" min="0" name="stock" defaultValue={product?.stock || 0} required />
+        <span>Estado</span>
+        <select className="input" name="estado" defaultValue={product?.estado || "Activo"}>
+          <option value="Activo">Activo</option>
+          <option value="Inactivo">Inactivo</option>
+          <option value="Descatalogado">Descatalogado</option>
+        </select>
       </label>
 
       <label className="field">
-        <span>Categoria</span>
-        <input className="input" name="categoria" defaultValue={product?.categoria || ""} />
-      </label>
-
-      <label className="field checkbox-field">
-        <input type="checkbox" name="activo" defaultChecked={product?.activo ?? true} />
-        <span>Producto activo</span>
+        <span>Origen familia</span>
+        <input className="input" name="origen_familia" defaultValue={product?.origen_familia || ""} />
       </label>
 
       <label className="field field-full">
         <span>Descripcion</span>
         <textarea className="input textarea" name="descripcion" defaultValue={product?.descripcion || ""} />
+      </label>
+
+      <label className="field field-full">
+        <span>Observaciones</span>
+        <textarea className="input textarea" name="observaciones" defaultValue={product?.observaciones || ""} />
       </label>
 
       <div className="field-full form-actions">

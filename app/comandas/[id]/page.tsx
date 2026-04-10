@@ -87,8 +87,8 @@ export default async function ComandaDetailPage({
               <tbody>
                 {order.lineas?.map((item) => (
                   <tr key={item.id}>
-                    <td>{item.producto?.sku || "-"}</td>
-                    <td>{item.producto?.nombre || "-"}</td>
+                    <td>{item.producto?.referencia || "-"}</td>
+                    <td>{item.producto?.descripcion || "-"}</td>
                     <td style={{ textAlign: "center" }}>{item.cantidad}</td>
                     <td>Descuento cliente aplicado: 0%</td>
                   </tr>

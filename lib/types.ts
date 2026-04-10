@@ -14,16 +14,13 @@ export type Customer = {
 export type Product = {
   id: string;
   proveedor: string;
-  nombre: string;
-  sku: string;
-  referencia_proveedor: string;
-  familia: string | null;
-  imagen_url?: string | null;
+  referencia: string;
   descripcion: string | null;
+  familia: string | null;
+  origen_familia: string | null;
   precio: number;
-  stock: number;
-  categoria: string | null;
-  activo: boolean;
+  estado: string;
+  observaciones: string | null;
   created_at: string;
 };
 
@@ -34,7 +31,7 @@ export type OrderLine = {
   cantidad: number;
   precio_unitario: number;
   total: number;
-  producto?: Pick<Product, "id" | "nombre" | "sku"> | null;
+  producto?: Pick<Product, "id" | "referencia" | "descripcion"> | null;
 };
 
 export type Order = {

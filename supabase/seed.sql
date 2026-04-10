@@ -4,8 +4,8 @@ values
   ('Carlos Ruiz', 'carlos@ruizdistribucion.com', '+34 600 333 444', 'Avenida del Puerto 42', 'Valencia', '46023', 'Espana', 'Seguimiento por telefono')
 on conflict (email) do nothing;
 
-insert into public.productos (nombre, sku, descripcion, precio, stock, categoria, activo)
+insert into public.productos (proveedor, referencia, descripcion, familia, precio, estado, origen_familia, observaciones)
 values
-  ('Licencia CRM Basic', 'CRM-BASIC', 'Suscripcion anual para equipo pequeno', 99.00, 50, 'Software', true),
-  ('Pack Soporte Premium', 'SUP-PRO', 'Bolsa de horas de soporte', 250.00, 20, 'Servicios', true)
-on conflict (sku) do nothing;
+  ('ENPA', 'ENPA-CRM-BASIC', 'Licencia CRM Basic para punto de venta y seguimiento comercial', 'Software comercial', 99.00, 'Activo', 'Catalogo ENPA', 'Producto semilla para demos'),
+  ('ENPA', 'ENPA-SUP-PRO', 'Pack de soporte premium para acompanamiento y puesta en marcha', 'Servicios', 250.00, 'Activo', 'Catalogo ENPA', 'Incluye acompanamiento inicial')
+on conflict (referencia) do nothing;

@@ -13,13 +13,16 @@ export const customerSchema = z.object({
 });
 
 export const productSchema = z.object({
-  nombre: z.string().min(1, "El nombre es obligatorio."),
-  sku: z.string().min(1, "La referencia es obligatoria."),
+  proveedor: z.string().min(1, "El proveedor es obligatorio."),
+  referencia: z.string().min(1, "La referencia es obligatoria."),
   descripcion: z.string().optional(),
+  familia: z.string().optional(),
   precio: z.coerce.number().min(0, "El precio debe ser positivo."),
-  stock: z.coerce.number().int().min(0, "El stock no puede ser negativo."),
-  categoria: z.string().optional(),
-  activo: z.boolean()
+  estado: z.enum(["Activo", "Inactivo", "Descatalogado"], {
+    errorMap: () => ({ message: "El estado debe ser Activo, Inactivo o Descatalogado." })
+  }),
+  origen_familia: z.string().optional(),
+  observaciones: z.string().optional()
 });
 
 export const orderItemSchema = z.object({

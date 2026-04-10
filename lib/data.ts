@@ -28,16 +28,13 @@ function normalizeProduct(row: any): Product {
   return {
     id: row.id,
     proveedor: row.proveedor || "ENPA",
-    nombre: row.nombre,
-    sku: row.sku,
-    referencia_proveedor: row.referencia_proveedor || row.sku,
-    familia: row.familia || row.categoria,
-    imagen_url: row.imagen_url || null,
+    referencia: row.referencia || row.referencia_proveedor || row.sku,
     descripcion: row.descripcion,
+    familia: row.familia || row.categoria,
+    origen_familia: row.origen_familia || row.proveedor || "ENPA",
     precio: toNumber(row.precio),
-    stock: row.stock,
-    categoria: row.categoria,
-    activo: row.activo,
+    estado: row.estado || (row.activo === false ? "Inactivo" : "Activo"),
+    observaciones: row.observaciones || null,
     created_at: row.created_at
   };
 }
@@ -53,8 +50,8 @@ function normalizeOrderLine(row: any): OrderLine {
     producto: row.producto
       ? {
           id: row.producto.id,
-          nombre: row.producto.nombre,
-          sku: row.producto.sku
+          referencia: row.producto.referencia || row.producto.referencia_proveedor || row.producto.sku,
+          descripcion: row.producto.descripcion
         }
       : null
   };
@@ -120,8 +117,8 @@ export async function fetchActiveProducts() {
   const { data, error } = await supabase
     .from("productos")
     .select("*")
-    .eq("activo", true)
-    .order("nombre", { ascending: true });
+    .eq("estado", "Activo")
+    .order("referencia", { ascending: true });
   if (error) {
     throw new Error(error.message);
   }
@@ -222,7 +219,7 @@ export async function fetchOrderById(id: string) {
   const { data, error } = await supabase
     .from("pedidos")
     .select(
-      "id, numero, cliente_id, fecha, estado, subtotal, impuestos, total, notas, created_at, cliente:clientes(id, nombre, email, telefono), lineas:pedido_lineas(id, pedido_id, producto_id, cantidad, precio_unitario, total, producto:productos(id, nombre, sku))"
+      "id, numero, cliente_id, fecha, estado, subtotal, impuestos, total, notas, created_at, cliente:clientes(id, nombre, email, telefono), lineas:pedido_lineas(id, pedido_id, producto_id, cantidad, precio_unitario, total, producto:productos(id, referencia, descripcion))"
     )
     .eq("id", id)
     .maybeSingle();

@@ -20,7 +20,7 @@ export default async function NewOrderPage({
       <div className="page-stack">
         <PageHeader title="Nuevo presupuesto" description="Crea un presupuesto con una o varias lineas de producto." />
         <Notice
-          message="Necesitas al menos un cliente y un producto activo antes de crear presupuestos."
+          message="Necesitas al menos un cliente y un producto disponible antes de crear presupuestos."
           tone="error"
         />
       </div>
@@ -38,8 +38,8 @@ export default async function NewOrderPage({
         }))}
         products={products.map((product) => ({
           id: product.id,
-          nombre: product.nombre,
-          sku: product.sku,
+          referencia: product.referencia,
+          descripcion: product.descripcion || "Sin descripcion",
           precio: product.precio
         }))}
         order={{

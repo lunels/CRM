@@ -21,18 +21,19 @@ export default async function EditProductPage({
 
   const productFormData: ProductFormData = {
     id: product.id,
-    nombre: product.nombre,
-    sku: product.sku,
+    proveedor: product.proveedor,
+    referencia: product.referencia,
     descripcion: product.descripcion,
+    familia: product.familia,
     precio: product.precio,
-    stock: product.stock,
-    categoria: product.categoria,
-    activo: product.activo
+    estado: product.estado,
+    origen_familia: product.origen_familia,
+    observaciones: product.observaciones
   };
 
   return (
     <div className="page-stack">
-      <PageHeader title="Editar producto" description="Actualiza el detalle del producto seleccionado." />
+      <PageHeader title="Editar producto" description="Actualiza proveedor, referencia, familia y estado del producto." />
       <Notice message={query.error} tone="error" />
       <ProductForm product={productFormData} />
     </div>

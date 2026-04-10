@@ -49,8 +49,8 @@ export function ImportHub({ initialTab = "clientes" }: { initialTab?: "clientes"
         <CsvImportForm
           action={importProductsAction}
           title="Importacion CSV de productos"
-          description="Sube un archivo para crear o actualizar productos por SKU."
-          expectedColumns="nombre,sku,descripcion,precio,stock,categoria,activo"
+          description="Sube un archivo para crear o actualizar productos por referencia."
+          expectedColumns="proveedor,referencia,descripcion,familia,precio,estado,origen_familia,observaciones"
           tone="compact"
         />
       )}

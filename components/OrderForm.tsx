@@ -12,8 +12,8 @@ type CustomerOption = {
 
 type ProductOption = {
   id: string;
-  nombre: string;
-  sku: string;
+  referencia: string;
+  descripcion: string;
   precio: number;
 };
 
@@ -154,7 +154,7 @@ export function OrderForm({
             >
               {products.map((product) => (
                 <option key={product.id} value={product.id}>
-                  {product.nombre} ({product.sku})
+                  {product.referencia} - {product.descripcion}
                 </option>
               ))}
             </select>

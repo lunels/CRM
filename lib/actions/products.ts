@@ -16,13 +16,14 @@ function getErrorMessage(error: unknown, fallback: string) {
 
 function buildProductPayload(formData: FormData) {
   return {
-    nombre: String(formData.get("nombre") || ""),
-    sku: String(formData.get("sku") || ""),
+    proveedor: String(formData.get("proveedor") || "ENPA"),
+    referencia: String(formData.get("referencia") || ""),
     descripcion: String(formData.get("descripcion") || ""),
+    familia: String(formData.get("familia") || ""),
     precio: Number(formData.get("precio") || 0),
-    stock: Number(formData.get("stock") || 0),
-    categoria: String(formData.get("categoria") || ""),
-    activo: formData.get("activo") === "on"
+    estado: String(formData.get("estado") || "Activo"),
+    origen_familia: String(formData.get("origen_familia") || ""),
+    observaciones: String(formData.get("observaciones") || "")
   };
 }
 
@@ -54,7 +55,7 @@ export async function saveProductAction(formData: FormData) {
   } catch (error) {
     const rawMessage = getErrorMessage(error, "");
     const message = rawMessage.toLowerCase().includes("duplicate")
-      ? "Ya existe un producto con ese SKU."
+      ? "Ya existe un producto con esa referencia."
       : "No se pudo guardar el producto.";
     redirect(`${getProductRedirectPath(id)}?error=${encodeURIComponent(message)}`);
   }
@@ -113,19 +114,18 @@ export async function importProductsAction(_: ImportState, formData: FormData): 
   }
 
   const errors: string[] = [];
-  const validRows: Array<Record<string, string | number | boolean>> = [];
+  const validRows: Array<Record<string, string | number>> = [];
 
   for (const [index, record] of records.entries()) {
     const parsed = productSchema.safeParse({
-      nombre: record.nombre || record.name || "",
-      sku: record.sku || record.referencia || "",
+      proveedor: record.proveedor || "ENPA",
+      referencia: record.referencia || record.sku || "",
       descripcion: record.descripcion || record.description || "",
+      familia: record.familia || "",
       precio: record.precio || record.price || 0,
-      stock: record.stock || 0,
-      categoria: record.categoria || record.category || "",
-      activo: ["true", "1", "si", "yes", "activo"].includes(
-        String(record.activo || record.is_active || "true").toLowerCase()
-      )
+      estado: record.estado || "Activo",
+      origen_familia: record.origen_familia || record.origen || record.proveedor || "ENPA",
+      observaciones: record.observaciones || record.notes || ""
     });
 
     if (!parsed.success) {
@@ -141,7 +141,7 @@ export async function importProductsAction(_: ImportState, formData: FormData): 
   if (validRows.length > 0) {
     const { error, data } = await supabase
       .from("productos")
-      .upsert(validRows, { onConflict: "sku" })
+      .upsert(validRows, { onConflict: "referencia" })
       .select("id");
 
     if (error) {

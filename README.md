@@ -153,13 +153,14 @@ No se usa almacenamiento local persistente ni SQLite, por lo que el proyecto es 
 ### `productos`
 
 - `id`
-- `nombre`
-- `sku`
+- `proveedor`
+- `referencia`
 - `descripcion`
+- `familia`
 - `precio`
-- `stock`
-- `categoria`
-- `activo`
+- `estado`
+- `origen_familia`
+- `observaciones`
 - `created_at`
 
 ### `pedidos`
@@ -201,8 +202,8 @@ Lucia,lucia@empresa.com,+34600111222,Calle Mayor 1,Madrid,28001,Espana,Cliente V
 ### Formato CSV de productos
 
 ```csv
-nombre,sku,descripcion,precio,stock,categoria,activo
-Producto demo,SKU-001,Descripcion,99.90,12,Software,true
+proveedor,referencia,descripcion,familia,precio,estado,origen_familia,observaciones
+ENPA,REF-001,Descripcion,Iluminacion,99.90,Activo,Catalogo ENPA,Producto destacado
 ```
 
 Comportamiento:
@@ -210,7 +211,7 @@ Comportamiento:
 - valida filas antes de insertar
 - usa `upsert` en batch con Supabase
 - actualiza por `email` en clientes
-- actualiza por `sku` en productos
+- actualiza por `referencia` en productos
 - muestra resumen y errores
 
 ## Scripts

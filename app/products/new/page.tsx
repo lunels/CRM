@@ -11,7 +11,10 @@ export default async function NewProductPage({
 
   return (
     <div className="page-stack">
-      <PageHeader title="Nuevo producto" description="Anade un nuevo producto al catalogo." />
+      <PageHeader
+        title="Nuevo producto"
+        description="Anade un producto con proveedor, referencia, familia, precio y datos comerciales."
+      />
       <Notice message={params.error} tone="error" />
       <ProductForm />
     </div>

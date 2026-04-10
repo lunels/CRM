@@ -144,8 +144,8 @@ export default async function OrderDetailPage({
               <tbody>
                 {order.lineas?.map((item) => (
                   <tr key={item.id}>
-                    <td><code style={{ background: "var(--surface-alt)", padding: "0.125rem 0.375rem", borderRadius: "4px", fontSize: "0.8125rem" }}>{item.producto?.sku || "-"}</code></td>
-                    <td style={{ fontWeight: 500 }}>{item.producto?.nombre || "-"}</td>
+                    <td><code style={{ background: "var(--surface-alt)", padding: "0.125rem 0.375rem", borderRadius: "4px", fontSize: "0.8125rem" }}>{item.producto?.referencia || "-"}</code></td>
+                    <td style={{ fontWeight: 500 }}>{item.producto?.descripcion || "-"}</td>
                     <td style={{ textAlign: "center" }}>{item.cantidad}</td>
                     <td style={{ textAlign: "right", color: "var(--text-secondary)" }}>{formatCurrency(item.precio_unitario)}</td>
                     <td style={{ textAlign: "right", color: "var(--muted)" }}>{formatCurrency(0)}</td>

@@ -7,13 +7,13 @@ export default function ImportProductsPage() {
     <div className="page-stack">
       <PageHeader
         title="Importar productos"
-        description="Sube un CSV para crear o actualizar productos por SKU."
+        description="Sube un CSV para crear o actualizar productos por referencia."
       />
       <CsvImportForm
         action={importProductsAction}
         title="Importacion CSV de productos"
-        description="Si el SKU ya existe, el producto se actualizara con los nuevos datos."
-        expectedColumns="nombre,sku,descripcion,precio,stock,categoria,activo"
+        description="Si la referencia ya existe, el producto se actualizara con los nuevos datos."
+        expectedColumns="proveedor,referencia,descripcion,familia,precio,estado,origen_familia,observaciones"
       />
     </div>
   );

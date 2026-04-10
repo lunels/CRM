@@ -30,7 +30,7 @@ export default async function EditOrderPage({
       <div className="page-stack">
         <PageHeader title="Editar pedido" description="Actualiza lineas, cliente o estado del pedido." />
         <Notice
-          message="No hay clientes o productos activos suficientes para editar este pedido."
+          message="No hay clientes o productos disponibles suficientes para editar este pedido."
           tone="error"
         />
       </div>
@@ -48,8 +48,8 @@ export default async function EditOrderPage({
         }))}
         products={products.map((product) => ({
           id: product.id,
-          nombre: product.nombre,
-          sku: product.sku,
+          referencia: product.referencia,
+          descripcion: product.descripcion || "Sin descripcion",
           precio: product.precio
         }))}
         order={{

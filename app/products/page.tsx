@@ -19,15 +19,16 @@ export default async function ProductsPage({
       if (!query) {
         return true;
       }
-      const haystack = `${product.nombre} ${product.sku} ${product.categoria || ""}`.toLowerCase();
+      const haystack =
+        `${product.proveedor} ${product.referencia} ${product.descripcion || ""} ${product.familia || ""} ${product.origen_familia || ""}`.toLowerCase();
       return haystack.includes(query.toLowerCase());
     })
     .sort((left, right) => {
-      if (sort === "name") {
-        return left.nombre.localeCompare(right.nombre, "es");
+      if (sort === "reference") {
+        return left.referencia.localeCompare(right.referencia, "es");
       }
-      if (sort === "stock") {
-        return left.stock - right.stock;
+      if (sort === "provider") {
+        return left.proveedor.localeCompare(right.proveedor, "es");
       }
       return new Date(right.created_at).getTime() - new Date(left.created_at).getTime();
     });
@@ -47,13 +48,13 @@ export default async function ProductsPage({
       <Notice message={params.error} tone="error" />
 
       <SearchBar
-        placeholder="Buscar por nombre, SKU o categoria"
+        placeholder="Buscar por proveedor, referencia, descripcion o familia"
         search={query}
         sort={sort}
         sortOptions={[
           { value: "newest", label: "Mas recientes" },
-          { value: "name", label: "Nombre A-Z" },
-          { value: "stock", label: "Menor stock" }
+          { value: "reference", label: "Referencia A-Z" },
+          { value: "provider", label: "Proveedor A-Z" }
         ]}
       />
 
@@ -61,20 +62,21 @@ export default async function ProductsPage({
         <table className="table">
           <thead>
             <tr>
-              <th>Producto</th>
               <th>Proveedor</th>
               <th>Referencia</th>
+              <th>Descripcion</th>
               <th>Familia</th>
               <th style={{ textAlign: "right" }}>Precio</th>
-              <th style={{ textAlign: "right" }}>Stock</th>
               <th>Estado</th>
+              <th>Origen familia</th>
+              <th>Observaciones</th>
               <th style={{ width: "1%" }} />
             </tr>
           </thead>
           <tbody>
             {products.length === 0 ? (
               <tr>
-                <td colSpan={8} className="empty-cell">
+                <td colSpan={9} className="empty-cell">
                   No se han encontrado productos.
                 </td>
               </tr>
@@ -82,19 +84,20 @@ export default async function ProductsPage({
               products.map((product) => (
                 <tr key={product.id}>
                   <td>
-                    <span style={{ fontWeight: 500 }}>{product.nombre}</span>
+                    <span style={{ fontWeight: 600 }}>{product.proveedor}</span>
                     <div className="table-subtext">{formatDate(product.created_at)}</div>
                   </td>
-                  <td style={{ color: "var(--text-secondary)" }}>{product.proveedor}</td>
-                  <td><code style={{ background: "var(--surface-alt)", padding: "0.125rem 0.375rem", borderRadius: "4px", fontSize: "0.8125rem" }}>{product.referencia_proveedor}</code></td>
+                  <td><code style={{ background: "var(--surface-alt)", padding: "0.125rem 0.375rem", borderRadius: "4px", fontSize: "0.8125rem" }}>{product.referencia}</code></td>
+                  <td style={{ minWidth: "260px" }}>{product.descripcion || "-"}</td>
                   <td style={{ color: "var(--text-secondary)" }}>{product.familia || "-"}</td>
                   <td style={{ textAlign: "right", fontWeight: 500 }}>{formatCurrency(product.precio)}</td>
-                  <td style={{ textAlign: "right", color: product.stock < 10 ? "var(--warning)" : "var(--text-secondary)" }}>{product.stock}</td>
                   <td>
-                    <span className={`badge ${product.activo ? "badge-success" : "badge-default"}`}>
-                      {product.activo ? "Activo" : "Inactivo"}
+                    <span className={`badge ${product.estado === "Activo" ? "badge-success" : product.estado === "Inactivo" ? "badge-default" : "badge-warning"}`}>
+                      {product.estado}
                     </span>
                   </td>
+                  <td style={{ color: "var(--text-secondary)" }}>{product.origen_familia || "-"}</td>
+                  <td style={{ color: "var(--text-secondary)" }}>{product.observaciones || "-"}</td>
                   <td className="row-actions" style={{ whiteSpace: "nowrap" }}>
                     <Link href={`/products/${product.id}/edit`} className="button button-secondary button-sm">
                       Editar
